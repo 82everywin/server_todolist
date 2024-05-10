@@ -36,7 +36,7 @@ jobs:
           password: ${{ secrets.PASSWORD }}
           port: ${{ secrets.SSH_PORT }}
           source: "./build/libs/*.jar"
-          target: ${{ secrets.TARGET_PATH }}
+          target: download
 
       - name: Deploy remote ssh commands using password
         uses: appleboy/ssh-action@master
