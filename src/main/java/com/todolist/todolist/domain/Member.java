@@ -26,6 +26,8 @@ public class Member extends BaseEntity{
     @Column(nullable = false)
     private String password;
 
+    // 배포시 @Builder 표현식 무시- > 초기값을 기본값으로 설정
+    @Builder.Default
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
     // 1:N ] N쪽이 FK가진 연관관계의 주인
     private List<Todo> todoList = new ArrayList<>();
