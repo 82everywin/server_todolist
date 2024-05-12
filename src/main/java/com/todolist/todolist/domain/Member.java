@@ -7,8 +7,6 @@ import java.util.*;
 
 @Entity
 @Getter
-@Builder  // Builder & AllArgs -> Mapper 에서 id 를 찾아야 함..
-@AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Member extends BaseEntity{
 
@@ -26,11 +24,19 @@ public class Member extends BaseEntity{
     @Column(nullable = false)
     private String password;
 
-    // 배포시 @Builder 표현식 무시- > 초기값을 기본값으로 설정
-    @Builder.Default
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
     // 1:N ] N쪽이 FK가진 연관관계의 주인
     private List<Todo> todoList = new ArrayList<>();
+
+    @Builder
+    private Member(String name, String loginId, String password, List<Todo> todoList){
+        this.name = name;
+        this.loginId = loginId;
+        this.password = password;
+        this.todoList = todoList;
+    }
+
+
 
     public void updateLoginId(String loginId){
         this.loginId = loginId;

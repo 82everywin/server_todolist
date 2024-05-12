@@ -1,54 +1,48 @@
 package com.todolist.todolist.controller;
 
 
+import com.todolist.todolist.dto.member.MemberLoginResponseDto;
 import com.todolist.todolist.dto.member.MemberResponseDto;
 import com.todolist.todolist.dto.member.MemberRequestDto;
 import com.todolist.todolist.service.MemberService;
-import com.todolist.todolist.validators.ErrorMessageHandler;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 
 @RequestMapping("api/members")
 @RestController
 @RequiredArgsConstructor
 public class MemberController {
     private final MemberService memberService;
-    private final ErrorMessageHandler messageHandler;
 
-    // 회원가입
+    @Operation(summary = "회원가입")
     @PostMapping
-    public ResponseEntity<?> createMember(@RequestBody @Valid MemberRequestDto request, BindingResult bindingResult) {
-
-        if(bindingResult.hasErrors()){
-          Map<String,String> errorMessages = messageHandler.errorResult(bindingResult);
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorMessages);
-        }
+    public ResponseEntity<MemberResponseDto> createMember(@Valid @RequestBody MemberRequestDto request) {
 
         MemberResponseDto responseDto = memberService.create(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
     }
 
-    // 회원 정보 수정
+    @Operation(summary = "로그인")
+    @PostMapping("/login")
+    public ResponseEntity<MemberLoginResponseDto> loginMember(@RequestBody @Valid MemberRequestDto.LoginRequestDto request){
+        MemberLoginResponseDto responseDto = memberService.login(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
+    }
+    @Operation(summary = "회원정보 수정")
     @PutMapping("/{memberId}")
-    public ResponseEntity<?> updateMember(@RequestBody @Valid MemberRequestDto request, BindingResult bindingResult, @PathVariable Long memberId){
-
-        if(bindingResult.hasErrors()){
-            Map<String,String> errorMessages = messageHandler.errorResult(bindingResult);
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorMessages);
-        }
+    public ResponseEntity<MemberResponseDto> updateMember(@RequestBody @Valid MemberRequestDto request, @PathVariable Long memberId){
 
         MemberResponseDto responseDto = memberService.update(memberId, request);
         return ResponseEntity.status(HttpStatus.OK).body(responseDto);
     }
 
-    // 회원 검색 - 단일조회
+    @Operation(summary = "Id별 회원 조회")
     @GetMapping("/{memberId}")
     public ResponseEntity<MemberResponseDto> readOneMember(@PathVariable Long memberId){
         MemberResponseDto responseDto = memberService.searchId(memberId);
@@ -56,7 +50,7 @@ public class MemberController {
         return ResponseEntity.status(HttpStatus.OK).body(responseDto);
     }
 
-    // 회원 검색 - 전체
+    @Operation(summary = "일괄 회원 조회")
     @GetMapping
     public  ResponseEntity<List<MemberResponseDto>> readAllMember(){
         List<MemberResponseDto> responseDto = memberService.searchAll();
@@ -64,7 +58,7 @@ public class MemberController {
         return ResponseEntity.status(HttpStatus.OK).body(responseDto);
     }
 
-    // 회원 삭제
+    @Operation(summary = "회원 삭제")
     @DeleteMapping("/{memberId}")
     public ResponseEntity<Void> delete(@PathVariable Long memberId){
         memberService.delete(memberId);

@@ -10,21 +10,20 @@ import static org.springframework.http.HttpStatus.*;
 @RequiredArgsConstructor
 public enum ErrorCode {
 
-    // 409 CONFLICT ERROR
-    INVALID_ID(CONFLICT,"INVALID_ID","이미 존재하는 아이디입니다."),
+
+    // 401
+    UNAUTHORIZED_LOGIN(UNAUTHORIZED,"아이디 혹은 비밀번호를 잘못입력했습니다."),
 
     // 404 NOT_FOUND ERROR
-    NOT_EXIST_ID(NOT_FOUND,"NOT_EXIST_ID","존재하지 않는 회원입니다."),
-    NOT_EXIST_TODO(NOT_FOUND,"NOT_EXIST_TODO", "존재하지 않는 Todo입니다."),
-    NOT_MATCH_TODO_ID(NOT_FOUND,"NOT_MATCH_TODO_ID","회원과 일치하는 TODOLIST가 존재하지 않습니다.-");
+    NOT_EXIST_ID(NOT_FOUND,"존재하지 않는 회원입니다."),
+    NOT_EXIST_TODO(NOT_FOUND, "존재하지 않는 Todo입니다."),
+    NOT_MATCH_TODO_ID(NOT_FOUND,"회원과 일치하는 TODOLIST가 존재하지 않습니다."),
 
-    private final String message;
-    private final String code;
+    // 409 CONFLICT ERROR
+    DUPLICATE_LOGINID(CONFLICT,"이미 존재하는 아이디입니다.");
+
+
     private final HttpStatus status;
+    private final String message;
 
-    ErrorCode(final HttpStatus status, final String code, final String message){
-        this.status = status;
-        this.code = code;
-        this.message = message;
-    }
 }

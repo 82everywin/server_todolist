@@ -21,7 +21,6 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
 public class TodoService {
 
     private final TodoRepository todoRepository;
@@ -38,11 +37,12 @@ public class TodoService {
 
     // 1. Todo 추가
     public TodoResponseDto add(Long id, TodoRequestDto requestDto) {
-        Todo todo = TodoMapper.INSTANCE.toEntity(requestDto);
-        Member member = memberRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-        todo.matchMember(member);
 
+        Member member = memberRepository.findById(id)
+                .orElseThrow(() -> new BaseException(ErrorCode.NOT_EXIST_ID));
+
+        Todo todo = TodoMapper.INSTANCE.toEntity(requestDto);
+        todo.matchMember(member);
         todoRepository.save(todo);
 
         return TodoMapper.INSTANCE.toDto(todo);
@@ -102,7 +102,9 @@ public class TodoService {
 
     // 5. Todo 삭제
     public void delete(Long id) {
-        todoRepository.deleteById(id);
+       Todo todo = todoRepository.findById(id)
+                       .orElseThrow(()-> new BaseException(ErrorCode.NOT_EXIST_TODO));
+        todoRepository.deleteById(todo.getId());
     }
 
 }
