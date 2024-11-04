@@ -7,6 +7,7 @@ import com.todolist.todolist.dto.member.MemberRequestDto;
 import com.todolist.todolist.dto.member.MemberResponseDto;
 import com.todolist.todolist.repository.MemberRepository;
 
+import com.todolist.todolist.security.PasswordConfig;
 import com.todolist.todolist.validators.BaseException;
 import com.todolist.todolist.validators.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +21,8 @@ import java.util.stream.Collectors;
 public class MemberService {
 
     private final MemberRepository memberRepository;
+
+    private final PasswordConfig passwordConfig;
 
     /*
     1. 가입
@@ -35,19 +38,21 @@ public class MemberService {
         if (memberRepository.existsByLoginId(request.getLoginId()))
             throw new BaseException(ErrorCode.DUPLICATE_LOGINID);
 
-       Member member = MemberMapper.INSTANCE.toEntity(request);
-       memberRepository.save(member);
+        Member member = MemberMapper.INSTANCE.toEntity(request);
+        // 비밀번호 암호화
+        member.updatePassword(passwordConfig.passwordEncoder().encode(request.getPassword()));
+        memberRepository.save(member);
 
-       return MemberMapper.INSTANCE.toDto(member);
+        return MemberMapper.INSTANCE.toDto(member);
 
     }
 
     // 2. 로그인
     public MemberLoginResponseDto login(MemberRequestDto.LoginRequestDto request){
-       Member member = throwFindbyLoginId(request.getLoginId());
-       if (!member.getPassword().equals(request.getPassword()))
-           throw new BaseException(ErrorCode.UNAUTHORIZED_LOGIN);
-       return new MemberLoginResponseDto(member.getId());
+        Member member = throwFindbyLoginId(request.getLoginId());
+        if (!passwordConfig.passwordEncoder().matches(request.getPassword(), member.getPassword()))
+            throw new BaseException(ErrorCode.UNAUTHORIZED_LOGIN);
+        return new MemberLoginResponseDto(member.getLoginId());
     }
 
     // 3. 회원 검색
@@ -74,13 +79,13 @@ public class MemberService {
             throw new BaseException(ErrorCode.DUPLICATE_LOGINID);
         else {
             member.updateLoginId(request.getLoginId());
-            member.updatePassword(request.getPassword());
+            member.updatePassword(passwordConfig.passwordEncoder().encode(request.getPassword()));
             member.updateName(request.getName());
         }
 
-       memberRepository.save(member);
+        memberRepository.save(member);
 
-       return MemberMapper.INSTANCE.toDto(member);
+        return MemberMapper.INSTANCE.toDto(member);
     }
 
     // 6. 회원 삭제
@@ -91,13 +96,13 @@ public class MemberService {
     }
 
     // 회원 조회 메서드
-    private Member throwFindbyId(Long id){
+    public Member throwFindbyId(Long id){
         return memberRepository.findById(id)
                 .orElseThrow(() ->  new BaseException(ErrorCode.NOT_EXIST_ID));
     }
 
     // 회원 조회 - 로그인 아이디 조회 메서드
-    private Member throwFindbyLoginId(String loginId){
+    public Member throwFindbyLoginId(String loginId){
         return  memberRepository.findByLoginId(loginId)
                 .orElseThrow(()-> new BaseException(ErrorCode.NOT_EXIST_ID));
     }
